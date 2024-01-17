@@ -1,0 +1,13 @@
+{
+  "name": "Roast Chicken Collection",
+  "short_name": "Roast Chicken Collection",
+  "display": "standalone",
+  "theme_color": "#002140",
+  "background_color": "#001529",
+  "icons": [
+    {
+      "src": "favicon.ico",
+      "sizes": "128x128"
+    }
+  ]
+}

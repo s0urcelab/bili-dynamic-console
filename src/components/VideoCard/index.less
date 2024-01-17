@@ -1,0 +1,68 @@
+@import '~antd/es/style/themes/default.less';
+
+.user-link {
+    color: #00000073;
+}
+
+.user-date::before {
+    content: " • ";
+}
+
+.wrapper {
+    position: relative;
+
+    .duration {
+        position: absolute;
+        bottom: 0;
+        right: 0;
+        border-radius: 4px;
+        background-color: #333;
+        color: white;
+        margin: 4px;
+        padding: 0 6px;
+    }
+}
+.tag-group {
+    margin-left: 6px;
+    display: inline-flex;
+    flex-direction: row;
+    justify-content: space-between;
+
+    & > span {
+        margin: 0 4px;
+        padding: 4px 6px;
+    }
+}
+.q-tag {
+    background-color: #008ac5;
+    line-height: 14px;
+    color: white;
+    border-radius: 4px;
+    white-space: nowrap;
+}
+.v-tag {
+    background-color: orange;
+    line-height: 14px;
+    color: white;
+    border-radius: 4px;
+    white-space: nowrap;
+}
+.p-tag {
+    background-color: #52c41a;
+    line-height: 14px;
+    color: white;
+    border-radius: 4px;
+    white-space: nowrap;
+}
+.s-tag {
+    background-color: #fd4c5d;
+    line-height: 14px;
+    color: white;
+    border-radius: 4px;
+    white-space: nowrap;
+}
+.card-desc {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
