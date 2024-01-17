@@ -18,7 +18,7 @@ function Login() {
             const msg = code === 0 ? message.success : message.error
             msg(data)
             window.localStorage['MANAGE_LAYOUT'] = 1
-            history.goBack()
+            history.push('/manage')
         },
         onError: () => {
             message.error('登录失败！')

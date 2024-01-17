@@ -11,6 +11,7 @@ export default (path, opt) => {
     // }
     return request(`${prefix}${path}`, {
         ...opt,
+        credentials: 'include',
         errorHandler: function (error) {
             if (error.response.status === 401) {
                 message.error('请先登录！')

@@ -385,23 +385,26 @@ function Manage() {
             },
         },
         {
-            title: '油管投稿状态',
+            // title: '油管投稿状态',
+            title: '精选状态',
             dataIndex: 'ustatus',
             render: (status, record) => {
                 switch (status) {
-                    case 100:
-                        return <Space style={{ color: '#00c4ff' }}>准备投稿</Space>
-                    case 150:
-                        return <Space style={{ color: '#faad14' }}>上传中</Space>
                     case 200:
-                        return <Space
-                            style={{ color: '#52c41a', cursor: 'pointer' }}
-                            onClick={() => window.open(`https://www.youtube.com/watch?v=${record.ytb_id}`, '_blank')}
-                        >
-                            投稿成功
-                        </Space>
-                    case -1:
-                        return <div style={{ color: '#ff4d4f' }}>上传失败({record.up_retry})</div>
+                    case 100:
+                        // return <Space style={{ color: '#00c4ff' }}>准备投稿</Space>
+                        return <Space style={{ color: '#52c41a' }}>已精选</Space>
+                    // case 150:
+                    //     return <Space style={{ color: '#faad14' }}>上传中</Space>
+                    // case 200:
+                    //     return <Space
+                    //         style={{ color: '#52c41a', cursor: 'pointer' }}
+                    //         onClick={() => window.open(`https://www.youtube.com/watch?v=${record.ytb_id}`, '_blank')}
+                    //     >
+                    //         投稿成功
+                    //     </Space>
+                    // case -1:
+                    //     return <div style={{ color: '#ff4d4f' }}>上传失败({record.up_retry})</div>
                     case 0:
                         return <Space style={{ color: 'gray' }}>未处理</Space>
                     default:
@@ -441,7 +444,7 @@ function Manage() {
                                     >
                                         <Radio.Button value="" >ALL</Radio.Button>
                                         <Radio.Button value="1" >下载失败</Radio.Button>
-                                        <Radio.Button value="2" >上传失败</Radio.Button>
+                                        {/* <Radio.Button value="2" >上传失败</Radio.Button> */}
                                     </Radio.Group>
                                 </Space>
                             </Col>
