@@ -249,6 +249,24 @@ function Manage() {
         }
     })
 
+    const {
+        run: logoutToManage,
+    } = useRequest(params => API(`/admin.logout`, {
+        method: 'POST',
+        data: params,
+    }), {
+        manual: true,
+        onSuccess: ({ code, data }) => {
+            const msg = code === 0 ? message.success : message.error
+            msg(data)
+            window.localStorage.removeItem('MANAGE_LAYOUT')
+            history.push('/')
+        },
+        onError: () => {
+            message.error('退出登录失败！')
+        }
+    })
+
     const columns = [
         {
             title: '封面',
@@ -434,9 +452,10 @@ function Manage() {
                         <Row justify="space-between">
                             <Col span={18}>
                                 <Space>
+                                    <Button type="primary" onClick={() => logoutToManage()}>退出登录</Button>
                                     <span>空间占用：{info.size}</span>
-                                    <span>待上传：{info.waiting}</span>
-                                    <span>已上传：{info.uploaded}</span>
+                                    {/* <span>待上传：{info.waiting}</span>
+                                    <span>已上传：{info.uploaded}</span> */}
                                     <Radio.Group
                                         value={searchParams.dtype || ''}
                                         buttonStyle="solid"
@@ -464,14 +483,14 @@ function Manage() {
                 rowSelection={true}
                 tableAlertOptionRender={({ selectedRowKeys, selectedRows }) => (
                     <Space>
-                        <Button onClick={() => resetUpload(selectedRowKeys)}>
+                        {/* <Button onClick={() => resetUpload(selectedRowKeys)}>
                             重置上传
-                        </Button>
+                        </Button> */}
                         <Button onClick={() => resetBGM(selectedRowKeys)}>
                             重置BGM识别
                         </Button>
                         <Button disabled={!!uploading} type="primary" onClick={() => uploadYTB(selectedRowKeys)}>
-                            投稿Youtube
+                            精选投稿
                         </Button>
                         {
                             selectedRowKeys.length > 1 && (
