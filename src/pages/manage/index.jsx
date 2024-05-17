@@ -22,8 +22,9 @@ function Manage() {
     const playerRef = useRef()
     const [inputKey, setKey] = useState(0)
     const [searchParams, setSearch] = useState({})
-    const location = useLocation()
     const [isModalOpen, setIsModalOpen] = useState(false)
+    const [upList, setUpList] = useState([])
+    const location = useLocation()
 
     const closeModal = () => {
         setIsModalOpen(false)
@@ -49,15 +50,18 @@ function Manage() {
     }, [])
 
     const fetchList = async (params, sort) => {
-        const { code, data, total } = await API('/dyn.list', {
+        const { code, data, total, ups } = await API('/dyn.list', {
             method: 'GET',
             params: {
                 page: params.current,
                 size: params.pageSize,
                 ...params.dtype && { dtype: params.dtype },
                 ...params.uid && { uid: params.uid },
+                ...params.keyword && { keyword: params.keyword },
             },
         })
+
+        if (ups) setUpList(ups)
 
         return {
             data,
@@ -129,8 +133,13 @@ function Manage() {
             const lr = sortList[0]
             const fr = sortList[sortList.length - 1]
             if (fr.pdate > lr.pdate) {
-                return API(`/delete.from/${lr.pdate}/to/${fr.pdate}`, {
-                    method: 'GET',
+                return API(`/delete.batch`, {
+                    method: 'POST',
+                    data: {
+                        pd: lr.pdate,
+                        ts: fr.pdate,
+                        ...searchParams.uid && { uid: searchParams.uid }
+                    },
                 })
             }
         }
@@ -450,7 +459,7 @@ function Manage() {
                 tableExtraRender={() => (
                     <Card>
                         <Row justify="space-between">
-                            <Col span={18}>
+                            <Col span={10}>
                                 <Space>
                                     <Button type="primary" onClick={() => logoutToManage()}>退出登录</Button>
                                     <span>空间占用：{info.size}</span>
@@ -467,7 +476,34 @@ function Manage() {
                                     </Radio.Group>
                                 </Space>
                             </Col>
-                            <Col span={6}>
+                            <Col span={4}>
+                                {
+                                    upList.map(v => (
+                                        <Tag
+                                            key={v.uid}
+                                            color="processing"
+                                            className="clickable-tag"
+                                            onClick={() => {
+                                                updateSearch('keyword', undefined)
+                                                updateSearch('uid', v.uid)
+                                            }}
+                                        >
+                                            {v.uname}
+                                        </Tag>
+                                    ))
+                                }
+                            </Col>
+                            <Col span={4}>
+                                <Input.Search
+                                    placeholder="输入关键词"
+                                    enterButton="搜索"
+                                    onSearch={kw => {
+                                        updateSearch('uid', undefined)
+                                        updateSearch('keyword', kw)
+                                    }}
+                                />
+                            </Col>
+                            <Col span={4}>
                                 <Input.Search
                                     key={inputKey}
                                     placeholder="输入视频链接或BV/AC号..."
