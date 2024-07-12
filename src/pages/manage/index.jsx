@@ -391,7 +391,7 @@ function Manage() {
                         )
                     case -3:
                         return (
-                            <Space style={{ color: '#ff4d4f' }}>
+                            <Space style={{ color: '#ff4d4f', cursor: 'pointer' }} onClick={() => findLocal(record)}>
                                 <WarningFilled /><span>清晰度异常({record.dl_retry})</span>
                                 <Button type="primary" size="small" danger onClick={() => retry([record.vid])}>重试</Button>
                             </Space>
