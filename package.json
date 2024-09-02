@@ -5,7 +5,7 @@
   "description": "Roast Chicken Collection",
   "scripts": {
     "analyze": "cross-env ANALYZE=1 umi build",
-    "build": "umi build && scp -r ./dist/* root@192.168.1.101:/opt/bdm/static",
+    "deploy": "umi build && scp -r ./dist/* root@192.168.1.101:/opt/bdm/static",
     "dev": "npm run start:dev",
     "i18n-remove": "pro i18n-remove --locale=zh-CN --write",
     "postinstall": "umi g tmp",

@@ -1,28 +1,33 @@
-import { Space, Badge } from 'antd';
-import { Link } from 'umi';
-
-const NOW_VERSION = 4
+import { message, Space, Button } from 'antd';
+import { history, useLocation } from 'umi';
+import { useRequest } from 'ahooks';
+import API from '@/api'
 
 const GlobalHeaderRight = () => {
-  const isRead = JSON.parse(window.localStorage['WOT_CHANGELOG_VER'] || 0) === NOW_VERSION
-  const readIt = () => {
-    window.localStorage['WOT_CHANGELOG_VER'] = NOW_VERSION
-  }
+    const location = useLocation()
 
+    const {
+        run: logoutToManage,
+    } = useRequest(() => API(`/admin.logout`, {
+        method: 'POST',
+    }), {
+        manual: true,
+        onSuccess: ({ code, data }) => {
+            const msg = code === 0 ? message.success : message.error
+            msg(data)
+            window.localStorage.removeItem('MANAGE_LAYOUT')
+            history.push('/')
+        },
+        onError: () => {
+            message.error('退出登录失败！')
+        }
+    })
 
-  return (
+  return location.pathname === '/manage' ? (
     <Space>
-      {/* <Link to="/message">留言板</Link>
-      <a href="https://src.moe/donate" target="_blank">捐助我们</a>
-      <Badge
-        dot
-        count={+!isRead}
-        onClick={readIt}
-      >
-        <Link to="/changelogs">更新日志</Link>
-      </Badge> */}
+      <Button type="primary" onClick={() => logoutToManage()}>退出登录</Button>
     </Space>
-  );
+  ) : null;
 };
 
 export default GlobalHeaderRight;

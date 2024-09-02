@@ -5,8 +5,8 @@ import duration from 'dayjs/plugin/duration'
 import 'dayjs/locale/zh-cn'
 import Player from 'xgplayer';
 import 'xgplayer/dist/index.min.css';
-import Icon, { CheckCircleFilled, SyncOutlined, WarningFilled, UndoOutlined } from '@ant-design/icons';
-import { Tag, message, Image, Input, Space, Button, Col, Card, Radio, Row, Modal } from 'antd';
+import Icon, { SyncOutlined, PauseOutlined, CheckCircleFilled, WarningFilled, HddFilled, CloudFilled } from '@ant-design/icons';
+import { Switch, Tag, message, Image, Input, Space, Button, Col, Card, Radio, Row, Modal } from 'antd';
 import { GridContent } from '@ant-design/pro-layout';
 import ProTable from '@ant-design/pro-table';
 import { useRequest } from 'ahooks';
@@ -152,6 +152,21 @@ function Manage() {
     }))
 
     const {
+        run: toggleTask,
+    } = useRequest(params => API(`/toggle.bgtask`, {
+        method: 'GET',
+        params: {
+            status: params ? 'on' : 'off',
+        },
+    }), {
+        manual: true,
+        onSuccess: ({ code, data }) => {
+            const msg = code === 0 ? message.success : message.error
+            msg(data)
+        },
+    })
+
+    const {
         loading: clearing,
         run: clear,
     } = useRequest(handleClear, {
@@ -258,24 +273,6 @@ function Manage() {
         }
     })
 
-    const {
-        run: logoutToManage,
-    } = useRequest(params => API(`/admin.logout`, {
-        method: 'POST',
-        data: params,
-    }), {
-        manual: true,
-        onSuccess: ({ code, data }) => {
-            const msg = code === 0 ? message.success : message.error
-            msg(data)
-            window.localStorage.removeItem('MANAGE_LAYOUT')
-            history.push('/')
-        },
-        onError: () => {
-            message.error('退出登录失败！')
-        }
-    })
-
     const columns = [
         {
             title: '封面',
@@ -362,13 +359,22 @@ function Manage() {
             dataIndex: 'dstatus',
             render: (status, record) => {
                 switch (status) {
+                    case 201:
+                        return (
+                            <Space
+                                onClick={() => findLocal(record)}
+                                style={{ color: '#52c41a', cursor: 'pointer' }}
+                            >
+                                <CloudFilled />云盘
+                            </Space>
+                        )
                     case 200:
                         return (
                             <Space
                                 onClick={() => findLocal(record)}
                                 style={{ color: '#52c41a', cursor: 'pointer' }}
                             >
-                                <CheckCircleFilled />已下载
+                                <HddFilled />本地
                             </Space>
                         )
                     case 100:
@@ -419,6 +425,7 @@ function Manage() {
                 switch (status) {
                     case 200:
                     case 100:
+                    case 101:
                         // return <Space style={{ color: '#00c4ff' }}>准备投稿</Space>
                         return <Space style={{ color: '#52c41a' }}>已精选</Space>
                     // case 150:
@@ -461,10 +468,13 @@ function Manage() {
                         <Row justify="space-between">
                             <Col span={10}>
                                 <Space>
-                                    <Button type="primary" onClick={() => logoutToManage()}>退出登录</Button>
+                                    <Switch
+                                        checkedChildren={<Space><SyncOutlined spin />后台任务</Space>}
+                                        unCheckedChildren={<Space><PauseOutlined />后台任务</Space>}
+                                        defaultChecked={!!info.is_bg_task_running}
+                                        onChange={s => toggleTask(s)}
+                                    />
                                     <span>空间占用：{info.size}</span>
-                                    {/* <span>待上传：{info.waiting}</span>
-                                    <span>已上传：{info.uploaded}</span> */}
                                     <Radio.Group
                                         value={searchParams.dtype || ''}
                                         buttonStyle="solid"
