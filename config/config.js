@@ -86,7 +86,7 @@ export default defineConfig({
   webpack5: {},
   exportStatic: {},
   define: {
-    API_PREFIX: API_PREFIX || 'https://rcc.src.moe:8000/api',
+    API_PREFIX: API_PREFIX || '/api',
   },
   // analyze: {
   //   analyzerMode: 'server',

@@ -6,7 +6,7 @@ import 'dayjs/locale/zh-cn'
 import Player from 'xgplayer';
 import 'xgplayer/dist/index.min.css';
 import Icon, { SyncOutlined, PauseOutlined, CheckCircleFilled, WarningFilled, HddFilled, CloudFilled } from '@ant-design/icons';
-import { Switch, Tag, message, Image, Input, Space, Button, Col, Card, Radio, Row, Modal } from 'antd';
+import { Popover, Alert, Switch, Tag, message, Image, Input, Space, Button, Col, Card, Radio, Row, Modal } from 'antd';
 import { GridContent } from '@ant-design/pro-layout';
 import ProTable from '@ant-design/pro-table';
 import { useRequest } from 'ahooks';
@@ -397,8 +397,8 @@ function Manage() {
                         )
                     case -3:
                         return (
-                            <Space style={{ color: '#ff4d4f', cursor: 'pointer' }} onClick={() => findLocal(record)}>
-                                <WarningFilled /><span>清晰度异常({record.dl_retry})</span>
+                            <Space style={{ color: '#ff4d4f', cursor: 'pointer' }}>
+                                <div onClick={() => findLocal(record)}><WarningFilled /><span>清晰度异常({record.dl_retry})</span></div>
                                 <Button type="primary" size="small" danger onClick={() => retry([record.vid])}>重试</Button>
                             </Space>
                         )
@@ -406,6 +406,12 @@ function Manage() {
                         return (
                             <Space style={{ color: '#ff4d4f' }}>
                                 <WarningFilled /><span>拉取基础信息失败</span>
+                            </Space>
+                        )
+                    case -11:
+                        return (
+                            <Space style={{ color: '#ff4d4f' }}>
+                                <WarningFilled /><span>付费充电视频</span>
                             </Space>
                         )
                     default:
@@ -474,7 +480,14 @@ function Manage() {
                                         defaultChecked={!!info.is_bg_task_running}
                                         onChange={s => toggleTask(s)}
                                     />
-                                    <span>空间占用：{info.size}</span>
+                                    {
+                                        !info.is_bg_task_running && !!info.task_err_item ? (
+                                            <Popover content={info.task_err_msg} title="错误详情">
+                                                <Alert message={info.task_err_item} type="error" showIcon />
+                                            </Popover>
+                                        ) : null
+                                    }
+                                    <span>空间占用：本地 {info.local_size}，云盘 {info.cloud_size}</span>
                                     <Radio.Group
                                         value={searchParams.dtype || ''}
                                         buttonStyle="solid"
@@ -509,7 +522,7 @@ function Manage() {
                                     enterButton="搜索"
                                     onSearch={kw => {
                                         updateSearch('uid', undefined)
-                                        updateSearch('keyword', kw)
+                                        updateSearch('keyword', kw.trim())
                                     }}
                                 />
                             </Col>
