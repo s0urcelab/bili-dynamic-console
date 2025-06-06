@@ -5,7 +5,8 @@
   "description": "Roast Chicken Collection",
   "scripts": {
     "analyze": "cross-env ANALYZE=1 umi build",
-    "deploy": "umi build && scp -r ./dist/* user@127.0.0.1:/var/www/app",
+    "deploy:local": "umi build && scp -r ./dist/* user@127.0.0.1:/var/www/app",
+    "deploy:remote": "umi build && scp -r ./dist/* user@deploy-host.example:/var/www/app",
     "dev": "npm run start:dev",
     "i18n-remove": "pro i18n-remove --locale=zh-CN --write",
     "postinstall": "umi g tmp",
