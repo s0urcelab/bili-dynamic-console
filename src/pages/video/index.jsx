@@ -64,6 +64,12 @@ function Video() {
             fluid: true,
             videoInit: true,
             autoplay: true,
+            rotate: {
+                disable: false,
+                clockwise: true,
+                innerRotate: true,
+            },
+            replay: true,
         })
         ref.current = player
 

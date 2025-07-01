@@ -76,7 +76,7 @@
     "react-router": "^4.3.1",
     "umi": "^3.5.0",
     "umi-serve": "^1.9.10",
-    "xgplayer": "^3.0.9"
+    "xgplayer": "^3.0.22"
   },
   "devDependencies": {
     "@ant-design/pro-cli": "^2.0.2",

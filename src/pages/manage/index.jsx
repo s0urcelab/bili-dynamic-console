@@ -43,6 +43,12 @@ function Manage() {
             fluid: true,
             videoInit: true,
             autoplay: true,
+            rotate: {
+                disable: false,
+                clockwise: true,
+                innerRotate: true,
+            },
+            replay: true,
         })
         playerRef.current = player
 
