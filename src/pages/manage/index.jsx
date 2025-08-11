@@ -524,8 +524,9 @@ function Manage() {
                             </Col>
                             <Col span={4}>
                                 <Input.Search
-                                    placeholder="输入关键词"
+                                    placeholder="输入关键词、UP主UID、稿件VID..."
                                     enterButton="搜索"
+                                    allowClear
                                     onSearch={kw => {
                                         updateSearch('uid', undefined)
                                         updateSearch('keyword', kw.trim())
