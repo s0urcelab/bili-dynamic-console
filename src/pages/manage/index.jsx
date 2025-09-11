@@ -5,7 +5,7 @@ import duration from 'dayjs/plugin/duration'
 import 'dayjs/locale/zh-cn'
 import Player from 'xgplayer';
 import 'xgplayer/dist/index.min.css';
-import Icon, { SyncOutlined, PauseOutlined, CheckCircleFilled, WarningFilled, HddFilled, CloudFilled } from '@ant-design/icons';
+import Icon, { SyncOutlined, PauseOutlined, CheckCircleFilled, WarningFilled, HddFilled, CloudFilled, EditOutlined } from '@ant-design/icons';
 import { Popover, Alert, Switch, Tag, message, Image, Input, Space, Button, Col, Card, Radio, Row, Modal } from 'antd';
 import { GridContent } from '@ant-design/pro-layout';
 import ProTable from '@ant-design/pro-table';
@@ -24,6 +24,11 @@ function Manage() {
     const [searchParams, setSearch] = useState({})
     const [isModalOpen, setIsModalOpen] = useState(false)
     const [upList, setUpList] = useState([])
+    const [redirectModalOpen, setRedirectModalOpen] = useState(false)
+    const [redirectVid, setRedirectVid] = useState('')
+    const [upSearchValue, setUpSearchValue] = useState('')
+    const [matchedUps, setMatchedUps] = useState([])
+
     const location = useLocation()
 
     const closeModal = () => {
@@ -353,7 +358,22 @@ function Manage() {
                 //     return <a target="_blank" href={`https://www.acfun.cn/u/${record.uid}`}>{uname}</a>
                 // }
                 // return <a target="_blank" href={`https://space.bilibili.com/${record.uid}/video`}>{uname}</a>
-                return <a onClick={() => updateSearch('uid', record.uid)}>{uname}</a>
+                return (
+                    <div className="UPUPUP">
+                        <a onClick={() => updateSearch('uid', record.uid)}>{uname}</a>
+                        <Tag
+                            className="clickable-tag hidden-tag ml-4"
+                            icon={<EditOutlined />}
+                            color="#2db7f5"
+                            onClick={() => {
+                                setRedirectVid(record.vid)
+                                setRedirectModalOpen(true)
+                                setUpSearchValue('')
+                                setMatchedUps([])
+                            }}
+                        />
+                    </div>
+                )
             }
         },
         {
@@ -471,6 +491,25 @@ function Manage() {
         }
         message.error('链接有误！')
     }
+
+    // 添加重定向API请求
+    const { run: redirectUid } = useRequest((params) => API(`/redirect.uid`, {
+        method: 'POST',
+        data: params,
+    }), {
+        manual: true,
+        onSuccess: ({ code, data }) => {
+            const msg = code === 0 ? message.success : message.error
+            msg(data)
+            if (code === 0) {
+                setRedirectModalOpen(false)
+                ref.current.reload()
+            }
+        },
+        onError: () => {
+            message.error('重定向失败！')
+        }
+    })
 
     return (
         <GridContent>
@@ -598,6 +637,85 @@ function Manage() {
                 onCancel={closeModal}
             >
                 <div id="xgplayer" />
+            </Modal>
+            <Modal
+                title="重定向UP主"
+                open={redirectModalOpen}
+                onCancel={() => setRedirectModalOpen(false)}
+                footer={[
+                    <Button key="cancel" onClick={() => setRedirectModalOpen(false)}>
+                        取消
+                    </Button>
+                ]}
+            >
+                <Space direction="vertical" style={{ width: '100%' }}>
+                    <Input.Search
+                        placeholder="搜索UP主..."
+                        value={upSearchValue}
+                        onChange={e => setUpSearchValue(e.target.value)}
+                        onSearch={async (value) => {
+                            if (value.trim()) {
+                                const { code, ups } = await API('/dyn.list', {
+                                    method: 'GET',
+                                    params: {
+                                        keyword: value.trim(),
+                                        page: 1,
+                                        size: 10
+                                    }
+                                })
+                                if (code === 0 && ups) {
+                                    setMatchedUps(ups)
+                                }
+                            }
+                        }}
+                    />
+                    <div
+                        style={{
+                            maxHeight: 300,
+                            overflow: 'auto',
+                            marginTop: 16,
+                            background: '#f5f5f5',
+                            borderRadius: 4
+                        }}
+                    >
+                        {matchedUps.map(up => (
+                            <div
+                                key={up.uid}
+                                style={{
+                                    padding: '12px 16px',
+                                    cursor: 'pointer',
+                                    borderBottom: '1px solid #e8e8e8',
+                                    background: '#fff',
+                                    transition: 'all 0.3s',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'space-between'
+                                }}
+                                onClick={() => {
+                                    redirectUid({
+                                        vid: redirectVid,
+                                        uid: up.uid,
+                                        uname: up.uname
+                                    })
+                                }}
+                                onMouseEnter={e => e.currentTarget.style.background = '#f0f5ff'}
+                                onMouseLeave={e => e.currentTarget.style.background = '#fff'}
+                            >
+                                <span style={{ fontWeight: 500 }}>{up.uname}</span>
+                                <Tag color="blue">UID: {up.uid}</Tag>
+                            </div>
+                        ))}
+                        {matchedUps.length === 0 && upSearchValue && (
+                            <div style={{
+                                padding: '24px',
+                                textAlign: 'center',
+                                color: '#999'
+                            }}>
+                                未找到相关UP主
+                            </div>
+                        )}
+                    </div>
+                </Space>
             </Modal>
         </GridContent>
     );
