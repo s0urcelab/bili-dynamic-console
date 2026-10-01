@@ -1,8 +1,8 @@
-import { useEffect, useRef, useLayoutEffect } from 'react';
+import { useEffect, useRef, useLayoutEffect, useState } from 'react';
 import { history, useParams, useLocation } from 'umi'
 import Player from 'xgplayer';
 import 'xgplayer/dist/index.min.css';
-import { Spin, Typography, message, Image, Input, Space, Button, Col, Card, List, Radio, Row, Avatar } from 'antd';
+import { Spin, Typography, message, Image, Result, Button, Col, Card, List, Radio, Row, Avatar } from 'antd';
 import { useRequest } from 'ahooks';
 import API from '@/api'
 
@@ -24,6 +24,7 @@ function SideCard({ item }) {
 }
 
 function Video() {
+    const [is404, set404] = useState(false)
     const ref = useRef()
     const pathParams = useParams()
 
@@ -35,6 +36,9 @@ function Video() {
         method: 'GET',
     }), {
         manual: true,
+        onError: () => {
+            set404(true)
+        },
         onSuccess: ({ data }) => {
             ref.current.src = data.filesrc
         },
@@ -80,47 +84,54 @@ function Video() {
         fetchDetail(pathParams.vid)
     }, [pathParams.vid])
 
-    return (
-        <div className="video-container">
-            <Row gutter={40}>
-                <Col flex={60}>
-                    <Spin tip="视频加载中..." size="large" spinning={loading} wrapperClassName="video-spin-wrapper">
-                        <div id="xgplayer" />
-                    </Spin>
-                    <a href={`//www.bilibili.com/video/${detailInfo.data?.vid}`} target="_blank">
-                        <Typography.Title className="video-title" level={3}>
-                            {detailInfo.data?.etitle || detailInfo.data?.title}
-                        </Typography.Title>
-                    </a>
-                    <Card className="user-info-card">
-                        <Card.Meta
-                            avatar={<Avatar src={<Image src={detailInfo.data?.avatar} preview={false} referrerPolicy="no-referrer" />} />}
-                            title={<a href={`/u/${detailInfo.data?.uid}`} target="_blank">{detailInfo.data?.uname}</a>}
-                            description={detailInfo.data?.usign}
+    return is404
+        ? (
+            <Result
+                status="404"
+                title="404"
+                subTitle="视频不存在"
+            />
+        ) : (
+            <div className="video-container">
+                <Row gutter={40}>
+                    <Col flex={60}>
+                        <Spin tip="视频加载中..." size="large" spinning={loading} wrapperClassName="video-spin-wrapper">
+                            <div id="xgplayer" />
+                        </Spin>
+                        <a href={`//www.bilibili.com/video/${detailInfo.data?.vid}`} target="_blank">
+                            <Typography.Title className="video-title" level={3}>
+                                {detailInfo.data?.etitle || detailInfo.data?.title}
+                            </Typography.Title>
+                        </a>
+                        <Card className="user-info-card">
+                            <Card.Meta
+                                avatar={<Avatar src={<Image src={detailInfo.data?.avatar} preview={false} referrerPolicy="no-referrer" />} />}
+                                title={<a href={`/u/${detailInfo.data?.uid}`} target="_blank">{detailInfo.data?.uname}</a>}
+                                description={detailInfo.data?.usign}
+                            />
+                        </Card>
+                    </Col>
+                    <Col flex={1} style={{ minWidth: 400 }}>
+                        <List
+                            itemLayout="horizontal"
+                            dataSource={detailInfo.more}
+                            renderItem={(item) => (
+                                <List.Item>
+                                    <SideCard item={{ ...item, uname: detailInfo.data.uname }} />
+                                </List.Item>
+                            )}
                         />
-                    </Card>
-                </Col>
-                <Col flex={1} style={{ minWidth: 400 }}>
-                    <List
-                        itemLayout="horizontal"
-                        dataSource={detailInfo.more}
-                        renderItem={(item) => (
-                            <List.Item>
-                                <SideCard item={{ ...item, uname: detailInfo.data.uname }} />
-                            </List.Item>
-                        )}
-                    />
-                    {
-                        !!detailInfo.more.length && (
-                            <Button style={{ width: '100%' }} type="primary" onClick={() => history.push(`/u/${detailInfo.data.uid}`)}>
-                                观看她的更多视频
-                            </Button>
-                        )
-                    }
-                </Col>
-            </Row>
-        </div>
-    )
+                        {
+                            !!detailInfo.more.length && (
+                                <Button style={{ width: '100%' }} type="primary" onClick={() => history.push(`/u/${detailInfo.data.uid}`)}>
+                                    观看她的更多视频
+                                </Button>
+                            )
+                        }
+                    </Col>
+                </Row>
+            </div>
+        )
 };
 
 export default Video;
