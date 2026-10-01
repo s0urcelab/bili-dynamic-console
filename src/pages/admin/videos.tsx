@@ -5,7 +5,6 @@ import {
   CloudUploadIcon,
   ExternalLinkIcon,
   FileXIcon,
-  MoreHorizontalIcon,
   Music2Icon,
   PencilLineIcon,
   PlayIcon,
@@ -23,7 +22,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Checkbox } from '@/components/ui/checkbox'
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
+import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuSeparator, ContextMenuTrigger } from '@/components/ui/context-menu'
 import { InputGroup, InputGroupAddon, InputGroupButton, InputGroupInput } from '@/components/ui/input-group'
 import { Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -52,9 +51,8 @@ import { DeleteRangeDialog, ImportDialog, OwnerDialog, PreviewDialog } from '@/p
 
 const FILTERS: { value: AdminVideoFilter; label: string; count?: (s: Stats) => number; danger?: boolean }[] = [
   { value: 'all', label: '全部', count: (s) => s.total },
-  { value: 'pending', label: '待下载', count: (s) => countOf(s, 0) + countOf(s, 100) },
-  { value: 'local', label: '已下载', count: (s) => countOf(s, 200) },
-  { value: 'archived', label: '已归档', count: (s) => countOf(s, 201) },
+  { value: 'local', label: '本地', count: (s) => countOf(s, 200) },
+  { value: 'archived', label: '云盘', count: (s) => countOf(s, 201) },
   { value: 'download_failed', label: '下载失败', danger: true },
   { value: 'upload_failed', label: '上传失败', danger: true },
   { value: 'selected', label: '精选', count: (s) => s.selected },
@@ -123,25 +121,33 @@ export function VideosPage() {
         </div>
       </div>
 
-      <div className="overflow-x-auto pb-1">
-        <Tabs value={filter} onValueChange={(v) => update({ filter: v === 'all' ? null : v })}>
-          <TabsList>
-            {FILTERS.map((f) => {
-              const n = stats.data && f.count?.(stats.data)
-              return (
-                <TabsTrigger key={f.value} value={f.value} className="gap-1.5 px-3">
-                  {f.label}
-                  {n !== undefined && (
-                    <span className={cn('rounded-full px-1.5 text-[10px] tabular-nums', f.danger ? 'bg-destructive/10 text-destructive' : 'bg-muted-foreground/10 text-muted-foreground')}>
-                      {n.toLocaleString()}
-                    </span>
-                  )}
-                </TabsTrigger>
-              )
-            })}
-          </TabsList>
-        </Tabs>
-      </div>
+      <Tabs value={filter} onValueChange={(v) => update({ filter: v === 'all' ? null : v })}>
+        <TabsList className="h-auto w-full flex-wrap justify-start gap-1 group-data-horizontal/tabs:h-auto">
+          {FILTERS.map((f) => {
+            const n = stats.data && f.count?.(stats.data)
+            return (
+              <TabsTrigger
+                key={f.value}
+                value={f.value}
+                className="h-8 flex-none group/filter gap-1.5 px-3 data-active:bg-primary data-active:text-primary-foreground dark:data-active:border-transparent dark:data-active:bg-primary dark:data-active:text-primary-foreground"
+              >
+                {f.label}
+                {n !== undefined && (
+                  <span
+                    className={cn(
+                      'rounded-full px-1.5 text-[10px] tabular-nums',
+                      f.danger ? 'bg-destructive/10 text-destructive' : 'bg-muted-foreground/10 text-muted-foreground',
+                      'group-data-active/filter:bg-primary-foreground/20 group-data-active/filter:text-primary-foreground',
+                    )}
+                  >
+                    {n.toLocaleString()}
+                  </span>
+                )}
+              </TabsTrigger>
+            )
+          })}
+        </TabsList>
+      </Tabs>
 
       <div className="flex flex-wrap items-center gap-2">
         <form
@@ -208,15 +214,14 @@ export function VideosPage() {
                   <TableHead>UP 主</TableHead>
                   <TableHead>发布时间</TableHead>
                   <TableHead>下载状态</TableHead>
-                  <TableHead className="text-center">精选</TableHead>
-                  <TableHead className="w-10" />
+                  <TableHead className="pr-4 text-center">精选</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {list.isPending
                   ? Array.from({ length: 8 }).map((_, i) => (
                       <TableRow key={i}>
-                        <TableCell colSpan={9} className="px-4">
+                        <TableCell colSpan={8} className="px-4">
                           <Skeleton className="h-16" />
                         </TableCell>
                       </TableRow>
@@ -295,95 +300,97 @@ function VideoRow({ video: v, checked, onCheck, onPreview, onOwner, onDelete, on
   const previewable = canPreview(v)
 
   return (
-    <TableRow data-state={checked ? 'selected' : undefined} className="group">
-      <TableCell className="pl-4">
-        <Checkbox checked={checked} onCheckedChange={onCheck} aria-label="选择" />
-      </TableCell>
-      <TableCell>
-        <button className="relative block aspect-video w-[136px] overflow-hidden rounded-md bg-muted disabled:cursor-default" disabled={!previewable} onClick={onPreview}>
-          <img src={imgUrl(v.cover)} alt="" referrerPolicy="no-referrer" loading="lazy" className="size-full object-cover" />
-          <span className="absolute right-1 bottom-1 rounded bg-black/70 px-1 font-mono text-[10px] text-white">{durationText(v)}</span>
-          {previewable && (
-            <span className="absolute inset-0 grid place-items-center bg-black/40 opacity-0 transition-opacity group-hover:opacity-100">
-              <PlayIcon className="size-6 fill-white text-white" />
-            </span>
-          )}
-        </button>
-      </TableCell>
-      <TableCell className="whitespace-normal">
-        <div className="space-y-1.5">
-          <a href={sourceLink(v)} target="_blank" rel="noreferrer" className="line-clamp-2 font-medium hover:text-primary">
-            {v.title}
-          </a>
-          <div className="flex flex-wrap items-center gap-1">
-            {isAcfun(v) && <Badge variant="destructive">AcFun</Badge>}
-            {v.source === 1 && <Badge variant="outline">手动导入</Badge>}
-            {p > 1 && <Badge className="bg-info/10 text-info">P{p}</Badge>}
-            {v.max_quality && <Badge variant="secondary">{v.max_quality}</Badge>}
-            {!!v.is_portrait && <Badge className="bg-violet-500/10 text-violet-600 dark:text-violet-400">竖屏</Badge>}
-            <code className="font-mono text-[11px] text-muted-foreground">{v.vid}</code>
-          </div>
-        </div>
-      </TableCell>
-      <TableCell>
-        <BgmCell video={v} />
-      </TableCell>
-      <TableCell>
-        <div className="flex items-center gap-1">
-          <button className="max-w-28 truncate text-left hover:text-primary hover:underline" onClick={onFilterUp}>
-            {up.uname}
-          </button>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button variant="ghost" size="icon-xs" className="opacity-0 group-hover:opacity-100 focus-visible:opacity-100" onClick={onOwner} aria-label="修改归属">
-                <UserRoundPenIcon />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>修改归属</TooltipContent>
-          </Tooltip>
-        </div>
-      </TableCell>
-      <TableCell className="text-muted-foreground tabular-nums">{v.pdstr}</TableCell>
-      <TableCell>
-        <div className="flex flex-col items-start gap-1">
-          {v.dl_error ? (
-            <Tooltip>
-              <TooltipTrigger>
+    <ContextMenu>
+      <ContextMenuTrigger asChild>
+        <TableRow data-state={checked ? 'selected' : undefined} className="group">
+          <TableCell className="pl-4">
+            <Checkbox checked={checked} onCheckedChange={onCheck} aria-label="选择" />
+          </TableCell>
+          <TableCell>
+            <button className="relative block aspect-video w-[136px] overflow-hidden rounded-md bg-muted disabled:cursor-default" disabled={!previewable} onClick={onPreview}>
+              <img src={imgUrl(v.cover)} alt="" referrerPolicy="no-referrer" loading="lazy" className="size-full object-cover" />
+              <span className="absolute right-1 bottom-1 rounded bg-black/70 px-1 font-mono text-[10px] text-white">{durationText(v)}</span>
+              {previewable && (
+                <span className="absolute inset-0 grid place-items-center bg-black/40 opacity-0 transition-opacity group-hover:opacity-100">
+                  <PlayIcon className="size-6 fill-white text-white" />
+                </span>
+              )}
+            </button>
+          </TableCell>
+          <TableCell className="whitespace-normal">
+            <div className="space-y-1.5">
+              <a href={sourceLink(v)} target="_blank" rel="noreferrer" className="line-clamp-2 font-medium hover:text-primary">
+                {v.title}
+              </a>
+              <div className="flex flex-wrap items-center gap-1">
+                {isAcfun(v) && <Badge variant="destructive">AcFun</Badge>}
+                {v.source === 1 && <Badge variant="outline">手动导入</Badge>}
+                {p > 1 && <Badge className="bg-info/10 text-info">P{p}</Badge>}
+                {v.max_quality && <Badge variant="secondary">{v.max_quality}</Badge>}
+                {!!v.is_portrait && <Badge className="bg-violet-500/10 text-violet-600 dark:text-violet-400">竖屏</Badge>}
+                <code className="font-mono text-[11px] text-muted-foreground">{v.vid}</code>
+              </div>
+            </div>
+          </TableCell>
+          <TableCell>
+            <BgmCell video={v} />
+          </TableCell>
+          <TableCell>
+            <div className="flex items-center gap-1">
+              <button className="max-w-28 truncate text-left hover:text-primary hover:underline" onClick={onFilterUp}>
+                {up.uname}
+              </button>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button variant="ghost" size="icon-xs" className="opacity-0 group-hover:opacity-100 focus-visible:opacity-100" onClick={onOwner} aria-label="修改归属">
+                    <UserRoundPenIcon />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>修改归属</TooltipContent>
+              </Tooltip>
+            </div>
+          </TableCell>
+          <TableCell className="text-muted-foreground tabular-nums">{v.pdstr}</TableCell>
+          <TableCell>
+            <div className="flex flex-col items-start gap-1">
+              {v.dl_error ? (
+                <Tooltip>
+                  <TooltipTrigger>
+                    <DStatusBadge dstatus={v.dstatus} label={v.dstatus_label} retry={v.dl_retry} />
+                  </TooltipTrigger>
+                  <TooltipContent className="max-w-sm font-mono break-all">{v.dl_error}</TooltipContent>
+                </Tooltip>
+              ) : (
                 <DStatusBadge dstatus={v.dstatus} label={v.dstatus_label} retry={v.dl_retry} />
-              </TooltipTrigger>
-              <TooltipContent className="max-w-sm font-mono break-all">{v.dl_error}</TooltipContent>
-            </Tooltip>
-          ) : (
-            <DStatusBadge dstatus={v.dstatus} label={v.dstatus_label} retry={v.dl_retry} />
-          )}
-          {v.dl_requested && <span className="text-xs text-info">已请求重新下载</span>}
-          {v.cloud_error && (
-            <Tooltip>
-              <TooltipTrigger className="flex items-center gap-1 text-xs text-destructive">
-                <CloudUploadIcon className="size-3" />
-                上传失败 ×{v.cloud_retry}
-              </TooltipTrigger>
-              <TooltipContent className="max-w-sm font-mono break-all">{v.cloud_error}</TooltipContent>
-            </Tooltip>
-          )}
-        </div>
-      </TableCell>
-      <TableCell className="text-center">
-        <Button
-          variant="ghost"
-          size="icon-sm"
-          aria-label={v.selected ? '取消精选' : '精选'}
-          disabled={select.isPending}
-          onClick={() => select.mutate({ vids: [v.vid], selected: !v.selected })}
-          className={v.selected ? 'text-amber-500 hover:text-amber-500' : 'text-muted-foreground/50'}
-        >
-          <StarIcon className={v.selected ? 'fill-current' : undefined} />
-        </Button>
-      </TableCell>
-      <TableCell className="pr-4">
-        <RowActions video={v} onPreview={onPreview} onOwner={onOwner} onDelete={onDelete} />
-      </TableCell>
-    </TableRow>
+              )}
+              {v.dl_requested && <span className="text-xs text-info">已请求重新下载</span>}
+              {v.cloud_error && (
+                <Tooltip>
+                  <TooltipTrigger className="flex items-center gap-1 text-xs text-destructive">
+                    <CloudUploadIcon className="size-3" />
+                    上传失败 ×{v.cloud_retry}
+                  </TooltipTrigger>
+                  <TooltipContent className="max-w-sm font-mono break-all">{v.cloud_error}</TooltipContent>
+                </Tooltip>
+              )}
+            </div>
+          </TableCell>
+          <TableCell className="pr-4 text-center">
+            <Button
+              variant="ghost"
+              size="icon-sm"
+              aria-label={v.selected ? '取消精选' : '精选'}
+              disabled={select.isPending}
+              onClick={() => select.mutate({ vids: [v.vid], selected: !v.selected })}
+              className={v.selected ? 'text-amber-500 hover:text-amber-500' : 'text-muted-foreground/50'}
+            >
+              <StarIcon className={v.selected ? 'fill-current' : undefined} />
+            </Button>
+          </TableCell>
+        </TableRow>
+      </ContextMenuTrigger>
+      <RowActions video={v} onPreview={onPreview} onOwner={onOwner} onDelete={onDelete} />
+    </ContextMenu>
   )
 }
 
@@ -452,51 +459,44 @@ function RowActions({ video, onPreview, onOwner, onDelete }: { video: Video; onP
   const vids = [video.vid]
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon-sm" aria-label="更多">
-          <MoreHorizontalIcon />
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-44">
-        <DropdownMenuItem onClick={onPreview} disabled={!canPreview(video)}>
-          <PlayIcon />
-          预览
-        </DropdownMenuItem>
-        <DropdownMenuItem asChild>
-          <a href={sourceLink(video)} target="_blank" rel="noreferrer">
-            <ExternalLinkIcon />
-            打开原稿件
-          </a>
-        </DropdownMenuItem>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={() => select.mutate({ vids, selected: !video.selected })}>
-          {video.selected ? <StarOffIcon /> : <StarIcon />}
-          {video.selected ? '取消精选' : '精选'}
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => retryDownload.mutate(vids)} disabled={video.dstatus === 100}>
-          <RotateCcwIcon />
-          重新下载
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => retryUpload.mutate(vids)} disabled={video.dstatus !== 200}>
-          <CloudUploadIcon />
-          重试上传
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => resetBgm.mutate(vids)} disabled={video.dstatus !== 200}>
-          <Music2Icon />
-          重新识别 BGM
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={onOwner}>
-          <UserRoundPenIcon />
-          修改归属 UP 主
-        </DropdownMenuItem>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem variant="destructive" onClick={onDelete}>
-          <Trash2Icon />
-          彻底删除
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
+    <ContextMenuContent className="w-44">
+      <ContextMenuItem onClick={onPreview} disabled={!canPreview(video)}>
+        <PlayIcon />
+        预览
+      </ContextMenuItem>
+      <ContextMenuItem asChild>
+        <a href={sourceLink(video)} target="_blank" rel="noreferrer">
+          <ExternalLinkIcon />
+          打开原稿件
+        </a>
+      </ContextMenuItem>
+      <ContextMenuSeparator />
+      <ContextMenuItem onClick={() => select.mutate({ vids, selected: !video.selected })}>
+        {video.selected ? <StarOffIcon /> : <StarIcon />}
+        {video.selected ? '取消精选' : '精选'}
+      </ContextMenuItem>
+      <ContextMenuItem onClick={() => retryDownload.mutate(vids)} disabled={video.dstatus === 100}>
+        <RotateCcwIcon />
+        重新下载
+      </ContextMenuItem>
+      <ContextMenuItem onClick={() => retryUpload.mutate(vids)} disabled={video.dstatus !== 200}>
+        <CloudUploadIcon />
+        重试上传
+      </ContextMenuItem>
+      <ContextMenuItem onClick={() => resetBgm.mutate(vids)} disabled={video.dstatus !== 200}>
+        <Music2Icon />
+        重新识别 BGM
+      </ContextMenuItem>
+      <ContextMenuItem onClick={onOwner}>
+        <UserRoundPenIcon />
+        修改归属 UP 主
+      </ContextMenuItem>
+      <ContextMenuSeparator />
+      <ContextMenuItem variant="destructive" onClick={onDelete}>
+        <Trash2Icon />
+        彻底删除
+      </ContextMenuItem>
+    </ContextMenuContent>
   )
 }
 

@@ -13,8 +13,8 @@ import { formatBytes, timeOf } from '@/lib/format'
 import { imgUrl } from '@/lib/video'
 
 const STATUS_COLOR: Record<number, string> = {
-  201: 'var(--chart-3)',
-  200: 'var(--chart-2)',
+  201: 'var(--chart-2)',
+  200: 'var(--chart-3)',
   0: 'var(--muted-foreground)',
   100: 'var(--info)',
   [-1]: 'var(--destructive)',
@@ -96,7 +96,7 @@ function StatCards() {
   const items = [
     { icon: FilmIcon, label: '稿件总数', value: stats?.total, hint: '含全部下载状态' },
     { icon: SparklesIcon, label: '精选稿件', value: stats?.selected, hint: stats?.total ? `占比 ${Math.round((stats.selected / stats.total) * 100)}%` : '', accent: true },
-    { icon: CloudUploadIcon, label: '等待上传', value: stats?.waiting_upload, hint: '已下载、未上传云盘' },
+    { icon: CloudUploadIcon, label: '等待上传', value: stats?.waiting_upload, hint: '本地、未上传云盘' },
     { icon: Music2Icon, label: '等待识别 BGM', value: stats?.waiting_match, hint: '本地文件就绪' },
   ]
   return (

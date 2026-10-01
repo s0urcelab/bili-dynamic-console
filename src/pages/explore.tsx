@@ -2,7 +2,6 @@ import { Link, useSearchParams } from 'react-router-dom'
 import { ChevronRightIcon, SparklesIcon, UsersRoundIcon, XIcon } from 'lucide-react'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
-import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
 import { Skeleton } from '@/components/ui/skeleton'
 import { EmptyState, EndOfList, ErrorState, LoadMoreSentinel } from '@/components/states'
 import { VideoCard, VideoCardSkeletons, VideoGrid } from '@/components/video-card'
@@ -83,8 +82,8 @@ function FollowedUps() {
           </Button>
         )}
       </div>
-      <ScrollArea className="w-full">
-        <div className="flex gap-5 pb-3">
+      <div className="relative">
+        <div className="flex gap-5 overflow-hidden py-1">
           {isPending
             ? Array.from({ length: 10 }).map((_, i) => (
                 <div key={i} className="flex w-16 shrink-0 flex-col items-center gap-1.5">
@@ -102,8 +101,8 @@ function FollowedUps() {
                 </Link>
               ))}
         </div>
-        <ScrollBar orientation="horizontal" />
-      </ScrollArea>
+        <div aria-hidden className="pointer-events-none absolute inset-y-0 right-0 w-24 bg-gradient-to-l from-background to-transparent" />
+      </div>
     </section>
   )
 }

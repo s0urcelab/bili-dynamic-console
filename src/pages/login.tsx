@@ -66,7 +66,6 @@ export function LoginPage() {
             </form>
           </CardContent>
         </Card>
-        <p className="text-center text-xs text-muted-foreground">登录状态保持 2 周，到期前自动续期</p>
       </div>
     </div>
   )

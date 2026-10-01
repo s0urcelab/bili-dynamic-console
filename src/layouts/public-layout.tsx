@@ -1,11 +1,10 @@
 import { Link, Outlet, useNavigate, useSearchParams } from 'react-router-dom'
-import { LayoutDashboardIcon, LogInIcon, LogOutIcon, SearchIcon, UserRoundIcon } from 'lucide-react'
+import { LayoutDashboardIcon, LogInIcon, SearchIcon } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
 import { Logo } from '@/components/logo'
 import { ThemeToggle } from '@/components/theme-toggle'
-import { useIsAdmin, useLogout } from '@/api/auth'
+import { useIsAdmin } from '@/api/auth'
 
 export function PublicLayout() {
   const navigate = useNavigate()
@@ -17,7 +16,7 @@ export function PublicLayout() {
       <header className="sticky top-0 z-40 border-b bg-background/80 backdrop-blur-lg supports-[backdrop-filter]:bg-background/60">
         <div className="mx-auto flex h-16 max-w-[1600px] items-center gap-4 px-4 md:px-8">
           <Link to="/" className="shrink-0">
-            <Logo />
+            <Logo titleClassName="max-md:sr-only" />
           </Link>
           <form
             className="mx-auto w-full max-w-xl"
@@ -49,7 +48,6 @@ export function PublicLayout() {
 
 function AccountMenu() {
   const isAdmin = useIsAdmin()
-  const logout = useLogout()
 
   if (!isAdmin) {
     return (
@@ -62,26 +60,10 @@ function AccountMenu() {
   }
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon" aria-label="账户">
-          <UserRoundIcon />
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-44">
-        <DropdownMenuLabel>管理员</DropdownMenuLabel>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem asChild>
-          <Link to="/manage">
-            <LayoutDashboardIcon />
-            管理后台
-          </Link>
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => logout.mutate()}>
-          <LogOutIcon />
-          退出登录
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
+    <Button variant="ghost" size="icon" aria-label="管理后台" asChild>
+      <Link to="/manage">
+        <LayoutDashboardIcon />
+      </Link>
+    </Button>
   )
 }

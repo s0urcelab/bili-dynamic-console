@@ -4,8 +4,8 @@ import { cn } from '@/lib/utils'
 const DSTATUS_LABEL: Record<number, string> = {
   0: '待下载',
   100: '下载中',
-  200: '已下载',
-  201: '已归档',
+  200: '本地',
+  201: '云盘',
   [-1]: '下载失败',
   [-2]: '文件缺失',
   [-3]: '分辨率不达标',
