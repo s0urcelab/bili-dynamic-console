@@ -14,7 +14,7 @@ import { DStatusBadge } from '@/components/dstatus-badge'
 import { Spinner } from '@/components/states'
 import { VideoPlayer } from '@/components/video-player'
 import { useDeleteRange, useImportVideo, useSetOwner, useUpSearch } from '@/api/admin'
-import { useUps, useVideoDetail } from '@/api/public'
+import { useUp, useUps, useVideoDetail } from '@/api/public'
 import { useDebounced } from '@/hooks/use-debounced'
 import { toDatetimeLocal } from '@/lib/format'
 import { imgUrl, upOf } from '@/lib/video'
@@ -121,13 +121,15 @@ export function DeleteRangeDialog({ defaultUid }: { defaultUid?: string | null }
   const [start, setStart] = useState('')
   const [end, setEnd] = useState('')
   const [uid, setUid] = useState<string>(ALL_UPS)
-  const ups = useUps()
+  const ups = useUps({ size: 50 }).data?.items ?? []
+  const defaultUp = useUp(open && defaultUid && !ups.some((u) => String(u.uid) === defaultUid) ? defaultUid : undefined).data
+  const options = defaultUp ? [defaultUp, ...ups] : ups
   const deleteRange = useDeleteRange()
 
   const startTs = start ? Math.floor(new Date(start).getTime() / 1000) : NaN
   const endTs = end ? Math.floor(new Date(end).getTime() / 1000) + 59 : NaN
   const valid = !Number.isNaN(startTs) && !Number.isNaN(endTs) && startTs <= endTs
-  const upName = uid === ALL_UPS ? '全部 UP 主' : (ups.data?.find((u) => String(u.uid) === uid)?.uname ?? `UID ${uid}`)
+  const upName = uid === ALL_UPS ? '全部 UP 主' : (options.find((u) => String(u.uid) === uid)?.uname ?? `UID ${uid}`)
 
   return (
     <Dialog
@@ -172,8 +174,8 @@ export function DeleteRangeDialog({ defaultUid }: { defaultUid?: string | null }
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value={ALL_UPS}>全部 UP 主</SelectItem>
-                {defaultUid && !ups.data?.some((u) => String(u.uid) === defaultUid) && <SelectItem value={defaultUid}>UID {defaultUid}</SelectItem>}
-                {ups.data?.map((u) => (
+                {defaultUid && !options.some((u) => String(u.uid) === defaultUid) && <SelectItem value={defaultUid}>UID {defaultUid}</SelectItem>}
+                {options.map((u) => (
                   <SelectItem key={u.uid} value={String(u.uid)}>
                     {u.uname}
                   </SelectItem>
@@ -210,12 +212,11 @@ export function DeleteRangeDialog({ defaultUid }: { defaultUid?: string | null }
 export function OwnerDialog({ video, onOpenChange }: { video: Video | null; onOpenChange: (open: boolean) => void }) {
   const [search, setSearch] = useState('')
   const keyword = useDebounced(search.trim())
-  const followed = useUps()
+  const recent = useUps()
   const searched = useUpSearch(keyword)
   const setOwner = useSetOwner()
-  const list: Up[] = keyword ? (searched.data ?? []) : (followed.data ?? [])
-  const loading = keyword ? searched.isFetching : followed.isPending
-
+  const list: Up[] = keyword ? (searched.data ?? []) : (recent.data?.items ?? [])
+  const loading = keyword ? searched.isFetching : recent.isPending
   return (
     <Dialog
       open={!!video}
@@ -240,7 +241,7 @@ export function OwnerDialog({ video, onOpenChange }: { video: Video | null; onOp
               <CommandEmpty>{keyword ? '未找到相关 UP 主' : '输入昵称搜索 UP 主'}</CommandEmpty>
             )}
             {!!list.length && (
-              <CommandGroup heading={keyword ? '搜索结果' : '关注列表'}>
+              <CommandGroup heading={keyword ? '搜索结果' : '最近更新'}>
                 {list.map((u) => (
                   <CommandItem
                     key={u.uid}

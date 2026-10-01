@@ -2,7 +2,6 @@ import { Link, Navigate, NavLink, Outlet, useLocation } from 'react-router-dom'
 import { CookieIcon, ExternalLinkIcon, FilmIcon, GaugeIcon, LogOutIcon, WorkflowIcon } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Separator } from '@/components/ui/separator'
 import {
   Sidebar,
   SidebarContent,
@@ -129,7 +128,6 @@ function AdminShell() {
       <SidebarInset className="min-w-0">
         <header className="sticky top-0 z-30 flex h-14 shrink-0 items-center gap-2 rounded-t-xl border-b bg-background/80 px-4 backdrop-blur">
           <SidebarTrigger className="-ml-1" />
-          <Separator orientation="vertical" className="mr-1 data-[orientation=vertical]:h-4" />
           <h1 className="text-sm font-medium">{current?.label}</h1>
           <div className="ml-auto flex items-center gap-2">
             {checkpoint.data && (

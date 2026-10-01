@@ -11,7 +11,11 @@ export type Up = {
   avatar: string
   sign?: string
   video_count?: number
+  /** 最新已发布稿件的发布时间（秒级时间戳） */
+  latest_at?: number
 }
+
+export type UpSort = 'recent' | 'count'
 
 export type Video = {
   vid: string

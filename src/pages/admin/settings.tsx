@@ -226,9 +226,9 @@ function UpdateCookieDialog({ info }: { info: CookieInfo }) {
           <DialogTitle>更新{info.label}</DialogTitle>
           <DialogDescription>保存后会立即检测一次登录状态。内容必须包含 bilibili.com 的 SESSDATA。</DialogDescription>
         </DialogHeader>
-        <div className="space-y-3">
+        <div className="min-w-0 space-y-3">
           <Textarea
-            className="max-h-80 min-h-40 font-mono text-xs"
+            className="max-h-80 min-h-40 overflow-x-auto font-mono text-xs whitespace-pre"
             value={content}
             onChange={(e) => setContent(e.target.value)}
             placeholder={'SESSDATA=...; bili_jct=...; buvid3=...\n\n或粘贴 Netscape cookies.txt 文件内容'}

@@ -1,5 +1,5 @@
 import { Link, useSearchParams } from 'react-router-dom'
-import { SparklesIcon, UsersRoundIcon, XIcon } from 'lucide-react'
+import { ChevronRightIcon, SparklesIcon, UsersRoundIcon, XIcon } from 'lucide-react'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
@@ -63,15 +63,26 @@ export function VideoFeed({ uid, hideUp, header }: { uid?: number | string; hide
 }
 
 function FollowedUps() {
-  const { data: ups, isPending, isError } = useUps()
+  const { data, isPending, isError } = useUps()
+  const ups = data?.items
   if (isError || (!isPending && !ups?.length)) return null
 
   return (
     <section className="space-y-3">
-      <h2 className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
-        <UsersRoundIcon className="size-4" />
-        关注的 UP 主
-      </h2>
+      <div className="flex items-center justify-between gap-2">
+        <h2 className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+          <UsersRoundIcon className="size-4" />
+          最近更新的 UP 主
+        </h2>
+        {data && (
+          <Button variant="ghost" size="sm" asChild className="text-muted-foreground">
+            <Link to="/ups">
+              全部 {data.total.toLocaleString()} 位
+              <ChevronRightIcon />
+            </Link>
+          </Button>
+        )}
+      </div>
       <ScrollArea className="w-full">
         <div className="flex gap-5 pb-3">
           {isPending
@@ -143,7 +154,7 @@ function SearchResult({ keyword }: { keyword: string }) {
   )
 }
 
-function UpResultCard({ up }: { up: Up }) {
+export function UpResultCard({ up }: { up: Up }) {
   return (
     <Link to={`/u/${up.uid}`} className="group flex items-center gap-4 rounded-xl border bg-card p-4 transition-colors hover:border-primary/40 hover:bg-accent">
       <Avatar className="size-14">

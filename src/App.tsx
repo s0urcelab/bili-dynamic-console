@@ -10,6 +10,7 @@ import { PublicLayout } from '@/layouts/public-layout'
 import { ExplorePage } from '@/pages/explore'
 import { NotFoundPage } from '@/pages/not-found'
 import { UpPage } from '@/pages/up'
+import { UpsPage } from '@/pages/ups'
 import { VideoPage } from '@/pages/video'
 
 const LoginPage = lazy(() => import('@/pages/login').then((m) => ({ default: m.LoginPage })))
@@ -30,6 +31,7 @@ export default function App() {
                 <Route element={<PublicLayout />}>
                   <Route index element={<ExplorePage />} />
                   <Route path="explore" element={<ExplorePage />} />
+                  <Route path="ups" element={<UpsPage />} />
                   <Route path="u/:uid" element={<UpPage />} />
                   <Route path="v/:vid" element={<VideoPage />} />
                   <Route path="*" element={<NotFoundPage />} />

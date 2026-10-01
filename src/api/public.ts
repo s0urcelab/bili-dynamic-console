@@ -1,8 +1,9 @@
 import { keepPreviousData, useInfiniteQuery, useQuery } from '@tanstack/react-query'
 import { request } from '@/lib/api'
-import type { Page, SearchResult, Up, Video, VideoDetail } from '@/types'
+import type { Page, SearchResult, Up, UpSort, Video, VideoDetail } from '@/types'
 
 const PAGE_SIZE = 20
+const UP_PAGE_SIZE = 48
 
 export function useVideoFeed(uid?: number | string) {
   return useInfiniteQuery({
@@ -30,16 +31,23 @@ export function useUp(uid: string | undefined) {
   })
 }
 
-/** 关注的 UP 主列表，兼容数组或分页结构 */
-export function useUps() {
+/** 有已发布稿件的 UP 主，只取第一页 */
+export function useUps({ size = 20, sort = 'recent' }: { size?: number; sort?: UpSort } = {}) {
   return useQuery({
-    queryKey: ['ups'],
-    queryFn: async () => {
-      const data = await request<Up[] | Page<Up>>('/ups')
-      return Array.isArray(data) ? data : data.items
-    },
+    queryKey: ['ups', 'list', { size, sort }],
+    queryFn: () => request<Page<Up>>('/ups', { params: { page: 1, size, sort } }),
     staleTime: 10 * 60_000,
     retry: false,
+  })
+}
+
+export function useUpFeed(sort: UpSort) {
+  return useInfiniteQuery({
+    queryKey: ['ups', 'feed', { sort }],
+    queryFn: ({ pageParam }) => request<Page<Up>>('/ups', { params: { page: pageParam, size: UP_PAGE_SIZE, sort } }),
+    initialPageParam: 1,
+    getNextPageParam: (last) => (last.page * last.size < last.total ? last.page + 1 : undefined),
+    staleTime: 10 * 60_000,
   })
 }
 
