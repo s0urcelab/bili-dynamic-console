@@ -127,6 +127,11 @@ export type Storage = {
   cloud: { used_bytes: number | null; total_bytes: number | null; error: string | null }
 }
 
+export type Versions = {
+  yt_dlp: string | null
+  shazamio: string | null
+}
+
 export type Stats = {
   total: number
   by_dstatus: { dstatus: number; label: string; count: number }[]

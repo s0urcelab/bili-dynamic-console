@@ -2,7 +2,7 @@ import { keepPreviousData, useQuery } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { request, requestEnvelope } from '@/lib/api'
 import { useApiMutation } from '@/api/mutation'
-import type { AdminVideoFilter, AdminVideosPage, Checkpoint, CookieInfo, CookieKind, Stats, Storage, Task, TaskName, TasksResponse } from '@/types'
+import type { AdminVideoFilter, AdminVideosPage, Checkpoint, CookieInfo, CookieKind, Stats, Storage, Task, TaskName, TasksResponse, Versions } from '@/types'
 
 export const adminKeys = {
   videos: ['admin', 'videos'] as const,
@@ -11,6 +11,7 @@ export const adminKeys = {
   tasks: ['admin', 'tasks'] as const,
   cookies: ['admin', 'cookies'] as const,
   checkpoint: ['admin', 'checkpoint'] as const,
+  versions: ['admin', 'versions'] as const,
 }
 
 export type AdminVideosParams = {
@@ -61,6 +62,10 @@ export function useCookies() {
 
 export function useCheckpoint() {
   return useQuery({ queryKey: adminKeys.checkpoint, queryFn: () => request<Checkpoint>('/admin/checkpoint') })
+}
+
+export function useVersions() {
+  return useQuery({ queryKey: adminKeys.versions, queryFn: () => request<Versions>('/admin/versions'), staleTime: Infinity })
 }
 
 const videoDataKeys = [adminKeys.videos, adminKeys.stats, ['videos'], ['video'], ['search']]

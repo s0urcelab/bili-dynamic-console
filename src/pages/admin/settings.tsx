@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { CalendarClockIcon, CheckCircle2Icon, CookieIcon, CrownIcon, Loader2Icon, RefreshCwIcon, ShieldAlertIcon, ShieldQuestionIcon, Trash2Icon, UploadIcon } from 'lucide-react'
+import { CalendarClockIcon, CheckCircle2Icon, CookieIcon, CrownIcon, Loader2Icon, PackageIcon, RefreshCwIcon, ShieldAlertIcon, ShieldQuestionIcon, Trash2Icon, UploadIcon } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardAction, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
@@ -10,7 +10,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { Textarea } from '@/components/ui/textarea'
 import { ConfirmDialog } from '@/components/confirm-dialog'
 import { ErrorState } from '@/components/states'
-import { useCheckCookie, useCheckpoint, useCookies, useDeleteCookie, useSaveCookie, useSetCheckpoint } from '@/api/admin'
+import { useCheckCookie, useCheckpoint, useCookies, useDeleteCookie, useSaveCookie, useSetCheckpoint, useVersions } from '@/api/admin'
 import { formatDate, timeOf, toDatetimeLocal } from '@/lib/format'
 import type { CookieInfo } from '@/types'
 
@@ -53,9 +53,12 @@ export function SettingsPage() {
       <section className="space-y-4">
         <div>
           <h2 className="text-xl font-semibold tracking-tight">系统</h2>
-          <p className="text-sm text-muted-foreground">动态抓取进度</p>
+          <p className="text-sm text-muted-foreground">动态抓取进度与依赖版本</p>
         </div>
-        <CheckpointCard />
+        <div className="grid items-start gap-4 lg:grid-cols-2">
+          <CheckpointCard />
+          <VersionsCard />
+        </div>
       </section>
     </div>
   )
@@ -274,7 +277,7 @@ function CheckpointCard() {
   const invalid = Number.isNaN(ms) || ms > now
 
   return (
-    <Card className="max-w-2xl">
+    <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <CalendarClockIcon className="size-4 text-primary" />
@@ -308,6 +311,52 @@ function CheckpointCard() {
           </Button>
         </div>
         <p className={value && invalid ? 'text-xs text-destructive' : 'text-xs text-muted-foreground'}>不能晚于当前时间。往前调整会重新抓取这段时间内的动态。</p>
+      </CardContent>
+    </Card>
+  )
+}
+
+const VERSION_ITEMS = [
+  { key: 'yt_dlp', name: 'yt-dlp', usage: '下载视频' },
+  { key: 'shazamio', name: 'shazamio', usage: '识别 BGM' },
+] as const
+
+function VersionsCard() {
+  const { data, isPending, isError, error, refetch } = useVersions()
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <PackageIcon className="size-4 text-primary" />
+          依赖版本
+        </CardTitle>
+        <CardDescription>api 与 worker 使用同一镜像，即 worker 实际使用的版本</CardDescription>
+      </CardHeader>
+      <CardContent>
+        {isError ? (
+          <ErrorState error={error} onRetry={() => refetch()} className="py-6" />
+        ) : (
+          <div className="divide-y rounded-lg border">
+            {VERSION_ITEMS.map(({ key, name, usage }) => (
+              <div key={key} className="flex items-center justify-between gap-4 px-4 py-3">
+                <div>
+                  <p className="font-mono text-sm font-medium">{name}</p>
+                  <p className="text-xs text-muted-foreground">{usage}</p>
+                </div>
+                {isPending ? (
+                  <Skeleton className="h-5 w-20" />
+                ) : data[key] ? (
+                  <Badge variant="secondary" className="font-mono tabular-nums">
+                    {data[key]}
+                  </Badge>
+                ) : (
+                  <Badge variant="destructive">未安装</Badge>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
       </CardContent>
     </Card>
   )
