@@ -32,6 +32,7 @@ import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { ConfirmDialog } from '@/components/confirm-dialog'
 import { DStatusBadge } from '@/components/dstatus-badge'
+import { ImportDialog } from '@/components/import-video-dialog'
 import { EmptyState, ErrorState } from '@/components/states'
 import {
   useAdminVideos,
@@ -47,7 +48,7 @@ import { durationText } from '@/lib/format'
 import { cn } from '@/lib/utils'
 import { bgmState, canPreview, imgUrl, isAcfun, partOf, sourceLink, upOf } from '@/lib/video'
 import type { AdminVideoFilter, Stats, Video } from '@/types'
-import { DeleteRangeDialog, ImportDialog, OwnerDialog, PreviewDialog } from '@/pages/admin/video-dialogs'
+import { DeleteRangeDialog, OwnerDialog, PreviewDialog } from '@/pages/admin/video-dialogs'
 
 const FILTERS: { value: AdminVideoFilter; label: string; count?: (s: Stats) => number; danger?: boolean }[] = [
   { value: 'all', label: '全部', count: (s) => s.total },

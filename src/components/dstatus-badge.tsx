@@ -17,7 +17,7 @@ const STYLE: Record<number, { cls: string; icon: React.ComponentType<{ className
   0: { cls: 'bg-muted text-muted-foreground', icon: CircleDashedIcon },
   100: { cls: 'bg-info/10 text-info', icon: Loader2Icon },
   200: { cls: 'bg-success/10 text-success', icon: HardDriveIcon },
-  201: { cls: 'bg-success/10 text-success', icon: CloudIcon },
+  201: { cls: 'bg-chart-2/10 text-chart-2', icon: CloudIcon },
   [-1]: { cls: 'bg-destructive/10 text-destructive', icon: OctagonXIcon },
   [-2]: { cls: 'bg-destructive/10 text-destructive', icon: FileXIcon },
   [-3]: { cls: 'bg-warning/15 text-warning', icon: MonitorDownIcon },

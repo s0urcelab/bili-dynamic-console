@@ -1,7 +1,8 @@
 import { Link, Outlet, useNavigate, useSearchParams } from 'react-router-dom'
-import { LayoutDashboardIcon, LogInIcon, SearchIcon } from 'lucide-react'
+import { LayoutDashboardIcon, LogInIcon, PlusIcon, SearchIcon } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
+import { ImportDialog } from '@/components/import-video-dialog'
 import { Logo } from '@/components/logo'
 import { ThemeToggle } from '@/components/theme-toggle'
 import { useIsAdmin } from '@/api/auth'
@@ -36,6 +37,7 @@ export function PublicLayout() {
           <div className="flex shrink-0 items-center gap-1">
             <ThemeToggle />
             <AccountMenu />
+            <ImportShortcut />
           </div>
         </div>
       </header>
@@ -43,6 +45,24 @@ export function PublicLayout() {
         <Outlet />
       </main>
     </div>
+  )
+}
+
+/** 已登录时的快捷入口：直接打开「导入稿件」弹窗 */
+function ImportShortcut() {
+  const isAdmin = useIsAdmin()
+
+  if (!isAdmin) return null
+
+  return (
+    <ImportDialog
+      trigger={
+        <Button aria-label="导入稿件" className="max-sm:size-8 max-sm:px-0">
+          <PlusIcon />
+          <span className="max-sm:hidden">导入稿件</span>
+        </Button>
+      }
+    />
   )
 }
 
