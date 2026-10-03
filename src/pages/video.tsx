@@ -33,8 +33,8 @@ export function VideoPage() {
   const up = video && upOf(video)
 
   return (
-    <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_380px]">
-      <div className="space-y-5">
+    <div className="grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,1fr)_380px]">
+      <div className="min-w-0 space-y-5">
         <div className="overflow-hidden rounded-2xl bg-black shadow-xl">
           {isPending ? (
             <Skeleton className="aspect-video rounded-none" />
@@ -98,9 +98,11 @@ export function VideoPage() {
                     <AvatarImage src={imgUrl(up!.avatar)} referrerPolicy="no-referrer" />
                     <AvatarFallback>{up!.uname.slice(0, 1)}</AvatarFallback>
                   </Avatar>
-                  <div className="min-w-0">
+                  <div className="min-w-0 flex-1">
                     <p className="font-medium hover:text-primary">{up!.uname}</p>
-                    <p className="truncate text-sm text-muted-foreground">{up!.sign || '这个人很懒，什么都没写'}</p>
+                    <p className="truncate text-sm text-muted-foreground" title={up!.sign || '这个人很懒，什么都没写'}>
+                      {up!.sign || '这个人很懒，什么都没写'}
+                    </p>
                   </div>
                 </Link>
                 <div className="flex gap-2">
@@ -146,7 +148,7 @@ export function VideoPage() {
         )}
       </div>
 
-      <aside className="space-y-4">
+      <aside className="min-w-0 space-y-4">
         <div className="flex items-center justify-between">
           <h2 className="font-semibold">TA 的更多稿件</h2>
           {up && (
