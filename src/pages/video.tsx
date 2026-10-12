@@ -35,11 +35,11 @@ export function VideoPage() {
   return (
     <div className="grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,1fr)_380px]">
       <div className="min-w-0 space-y-5">
-        <div className="overflow-hidden rounded-2xl bg-black shadow-xl">
+        <div className="aspect-video overflow-hidden rounded-2xl bg-black shadow-xl">
           {isPending ? (
             <Skeleton className="aspect-video rounded-none" />
           ) : data!.play_url ? (
-            <VideoPlayer src={data!.play_url} poster={imgUrl(video!.cover)} autoplay />
+            <VideoPlayer src={data!.play_url} poster={imgUrl(video!.cover)} autoplay className="h-full" />
           ) : (
             <div className="relative grid aspect-video place-items-center">
               <img src={imgUrl(video!.cover)} alt="" referrerPolicy="no-referrer" className="absolute inset-0 size-full object-contain opacity-30" />

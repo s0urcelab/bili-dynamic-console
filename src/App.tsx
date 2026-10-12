@@ -1,6 +1,6 @@
 import { lazy, Suspense } from 'react'
 import { QueryClientProvider } from '@tanstack/react-query'
-import { BrowserRouter, Route, Routes } from 'react-router-dom'
+import { createBrowserRouter, createRoutesFromElements, Outlet, Route, RouterProvider, ScrollRestoration } from 'react-router-dom'
 import { ThemeProvider } from 'next-themes'
 import { Toaster } from '@/components/ui/sonner'
 import { TooltipProvider } from '@/components/ui/tooltip'
@@ -20,32 +20,43 @@ const VideosPage = lazy(() => import('@/pages/admin/videos').then((m) => ({ defa
 const TasksPage = lazy(() => import('@/pages/admin/tasks').then((m) => ({ default: m.TasksPage })))
 const SettingsPage = lazy(() => import('@/pages/admin/settings').then((m) => ({ default: m.SettingsPage })))
 
+function RouterLayout() {
+  return (
+    <>
+      <Suspense fallback={<FullPageSpinner />}>
+        <Outlet />
+      </Suspense>
+      <ScrollRestoration />
+    </>
+  )
+}
+
+const router = createBrowserRouter(createRoutesFromElements(
+  <Route element={<RouterLayout />}>
+    <Route element={<PublicLayout />}>
+      <Route index element={<ExplorePage />} />
+      <Route path="explore" element={<ExplorePage />} />
+      <Route path="ups" element={<UpsPage />} />
+      <Route path="u/:uid" element={<UpPage />} />
+      <Route path="v/:vid" element={<VideoPage />} />
+      <Route path="*" element={<NotFoundPage />} />
+    </Route>
+    <Route path="login" element={<LoginPage />} />
+    <Route path="manage" element={<AdminLayout />}>
+      <Route index element={<DashboardPage />} />
+      <Route path="videos" element={<VideosPage />} />
+      <Route path="tasks" element={<TasksPage />} />
+      <Route path="settings" element={<SettingsPage />} />
+    </Route>
+  </Route>,
+))
+
 export default function App() {
   return (
     <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
       <QueryClientProvider client={queryClient}>
         <TooltipProvider delayDuration={200}>
-          <BrowserRouter>
-            <Suspense fallback={<FullPageSpinner />}>
-              <Routes>
-                <Route element={<PublicLayout />}>
-                  <Route index element={<ExplorePage />} />
-                  <Route path="explore" element={<ExplorePage />} />
-                  <Route path="ups" element={<UpsPage />} />
-                  <Route path="u/:uid" element={<UpPage />} />
-                  <Route path="v/:vid" element={<VideoPage />} />
-                  <Route path="*" element={<NotFoundPage />} />
-                </Route>
-                <Route path="login" element={<LoginPage />} />
-                <Route path="manage" element={<AdminLayout />}>
-                  <Route index element={<DashboardPage />} />
-                  <Route path="videos" element={<VideosPage />} />
-                  <Route path="tasks" element={<TasksPage />} />
-                  <Route path="settings" element={<SettingsPage />} />
-                </Route>
-              </Routes>
-            </Suspense>
-          </BrowserRouter>
+          <RouterProvider router={router} />
           <Toaster position="top-center" richColors />
         </TooltipProvider>
       </QueryClientProvider>
